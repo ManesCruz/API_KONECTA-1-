@@ -84,5 +84,7 @@ PublicacionSchema.virtual('contadorComentarios').get(function () {
 // Índices
 PublicacionSchema.index({ createdAt: -1 });
 PublicacionSchema.index({ autor: 1 });
+PublicacionSchema.index({ tipo: 1 });
+PublicacionSchema.index({ facultad: 1 });
 
 module.exports = mongoose.model('Publicacion', PublicacionSchema);

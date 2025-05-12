@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
 const UsuarioSchema = new mongoose.Schema({
   nombre: {
     type: String,
@@ -66,5 +68,35 @@ const UsuarioSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Encriptar contraseña antes de guardar
+UsuarioSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+  
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Método para comparar contraseñas
+UsuarioSchema.methods.compararPassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+// Método para obtener información pública del usuario
+UsuarioSchema.methods.getInfoPublica = function() {
+  return {
+    id: this._id,
+    nombre: this.nombre,
+    apellido: this.apellido,
+    foto_perfil: this.foto_perfil,
+    biografia: this.biografia,
+    seguidores: this.seguidores.length,
+    siguiendo: this.siguiendo.length,
+    publicaciones: this.publicaciones.length
+  };
+};
 
 module.exports = mongoose.model('Usuario', UsuarioSchema);
