@@ -53,7 +53,20 @@ const MensajeSchema = new mongoose.Schema({
 // Índices para mejorar el rendimiento
 MensajeSchema.index({ chat: 1, createdAt: -1 });
 MensajeSchema.index({ remitente: 1 });
-
+// Middleware para actualizar el último mensaje en el chat
+MensajeSchema.post('save', async function() {
+  try {
+    await this.model('Chat').findByIdAndUpdate(
+      this.chat,
+      { 
+        ultimoMensaje: this._id,
+        updatedAt: Date.now()
+      }
+    );
+  } catch (err) {
+    console.error('Error al actualizar el último mensaje del chat:', err);
+  }
+});
 
 
 module.exports = mongoose.model('Mensaje', MensajeSchema);
