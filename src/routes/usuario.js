@@ -1,7 +1,58 @@
 const express = require('express');
 const router = express.Router();
 const Usuario = require('../models/Usuario');
+const jwt = require('jsonwebtoken');
+
 const { verificarToken } = require('./validar_token');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'konecta-secret-key';
+
+
+router.post('/registro', async (req, res) => {
+  try {
+    const { nombre, apellido, email, password, biografia, rol } = req.body;
+
+    const existe = await Usuario.findOne({ email });
+    if (existe) {
+      return res.status(400).json({ exito: false, mensaje: 'El correo ya está registrado' });
+    }
+
+    const nuevoUsuario = new Usuario({
+  nombre,
+  apellido,
+  email,
+  password,
+  biografia,
+  rol: rol || 'usuario' // por defecto es 'usuario'
+});
+
+
+    await nuevoUsuario.save();
+
+    const token = jwt.sign({ id: nuevoUsuario._id }, JWT_SECRET, { expiresIn: '2h' });
+
+    res.status(201).json({
+      exito: true,
+      mensaje: 'Usuario registrado exitosamente',
+      token,
+      usuario: nuevoUsuario.getInfoPublica()
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ exito: false, mensaje: 'Error al registrar usuario' });
+  }
+});
+
+
+router.get('/', verificarToken, async (req, res) => {
+  try {
+    const usuarios = await Usuario.find().select('-password');
+    res.json({ exito: true, usuarios });
+  } catch (error) {
+    res.status(500).json({ exito: false, mensaje: 'Error al obtener usuarios' });
+  }
+});
+
 
 // Obtener listado de usuarios
 router.get('/', verificarToken, async (req, res) => {
@@ -62,7 +113,7 @@ router.get('/:id', verificarToken, async (req, res) => {
       .select('-__v')
       .populate('seguidores', 'nombre apellido foto_perfil')
       .populate('siguiendo', 'nombre apellido foto_perfil')
-      .populate('publicaciones');
+   
     
     if (!usuario) {
       return res.status(404).json({ 

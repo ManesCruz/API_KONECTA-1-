@@ -1,15 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const Publicacion = require('./models/Publicacion'); 
+const Publicacion = require('../models/Publicacion'); // Asegúrate de ajustar la ruta
+
 const router = express.Router();
 
-
-// Crear una nueva publicación
 router.post('/publicaciones', async (req, res) => {
   try {
     const publicacion = new Publicacion(req.body);
-    const savedPublicacion = await publicacion.save();
-    res.status(201).json(savedPublicacion);
+    const saved = await publicacion.save();
+    res.status(201).json(saved);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -40,8 +39,8 @@ router.get('/publicaciones/:id', async (req, res) => {
   }
 });
 
-// Actualizar una publicación por ID
-router.put('/publicaciones/:id', async (req, res) => {
+// PUT (Actualizar publicación)
+router.put('/:id', async (req, res) => {
   try {
     const publicacion = await Publicacion.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -54,8 +53,8 @@ router.put('/publicaciones/:id', async (req, res) => {
   }
 });
 
-// Eliminar una publicación por ID
-router.delete('/publicaciones/:id', async (req, res) => {
+// DELETE (Eliminar publicación)
+router.delete('/:id', async (req, res) => {
   try {
     const publicacion = await Publicacion.findByIdAndDelete(req.params.id);
     if (!publicacion) return res.status(404).json({ error: 'Publicación no encontrada' });
