@@ -1,5 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const Publicacion = require('./models/Publicacion'); 
+const router = express.Router();
+
 
 // Crear una nueva publicación
 router.post('/publicaciones', async (req, res) => {
@@ -61,3 +64,5 @@ router.delete('/publicaciones/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+module.exports = router;
