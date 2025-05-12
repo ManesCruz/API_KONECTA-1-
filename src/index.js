@@ -25,4 +25,8 @@ mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => console.log("Conexión exitosa"))
     .catch((error) => console.log(error));
+//Conexión al puerto
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+});
 
