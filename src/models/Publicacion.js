@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { TIPO_PUBLICACION } = require('../config/constants');
 
 const PublicacionSchema = new mongoose.Schema({
   titulo: {
@@ -11,19 +10,6 @@ const PublicacionSchema = new mongoose.Schema({
     type: String,
     required: [true, 'El contenido es obligatorio']
   },
-  multimedia: [
-    {
-      tipo: {
-        type: String,
-        enum: ['imagen', 'video'],
-        required: true
-      },
-      url: {
-        type: String,
-        required: true
-      }
-    }
-  ],
   autor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Usuario',
@@ -31,21 +17,15 @@ const PublicacionSchema = new mongoose.Schema({
   },
   facultad: {
     type: String,
-    required: function () {
-      return this.tipo === TIPO_PUBLICACION.NOTICIA;
-    }
+
   },
-  tipo: {
-    type: String,
-    enum: Object.values(TIPO_PUBLICACION),
-    default: TIPO_PUBLICACION.NORMAL
-  },
-  megusta: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Usuario'
-    }
-  ],
+ megusta: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Usuario'
+  }
+],
+
   comentarios: [
     {
       usuario: {
@@ -73,11 +53,11 @@ const PublicacionSchema = new mongoose.Schema({
 });
 
 // Virtuals
-PublicacionSchema.virtual('contadorMeGusta').get(function () {
+PublicacionSchema.virtual('contadorMeGusta').get(function() {
   return this.megusta.length;
 });
 
-PublicacionSchema.virtual('contadorComentarios').get(function () {
+PublicacionSchema.virtual('contadorComentarios').get(function() {
   return this.comentarios.length;
 });
 
