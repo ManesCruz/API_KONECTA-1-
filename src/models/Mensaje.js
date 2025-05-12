@@ -49,3 +49,11 @@ const MensajeSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// Índices para mejorar el rendimiento
+MensajeSchema.index({ chat: 1, createdAt: -1 });
+MensajeSchema.index({ remitente: 1 });
+
+
+
+module.exports = mongoose.model('Mensaje', MensajeSchema);
