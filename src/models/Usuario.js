@@ -70,15 +70,12 @@ const UsuarioSchema = new mongoose.Schema({
 });
 
 // Encriptar contraseña antes de guardar
-UsuarioSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+UsuarioSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
+
 
 // Método para comparar contraseñas
 UsuarioSchema.methods.compararPassword = async function(password) {
