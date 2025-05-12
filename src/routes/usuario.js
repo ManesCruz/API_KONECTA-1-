@@ -106,3 +106,63 @@ router.get('/:id', verificarToken, async (req, res) => {
     });
   }
 });
+
+// Actualizar información de usuario
+router.put('/:id', verificarToken, async (req, res) => {
+  try {
+    if (req.usuario.id !== req.params.id && req.usuario.rol !== 'admin') {
+      return res.status(403).json({ 
+        exito: false, 
+        mensaje: 'No tienes permiso' 
+      });
+    }
+    
+    const { nombre, apellido, biografia } = req.body;
+    const camposActualizables = {};
+    if (nombre) camposActualizables.nombre = nombre;
+    if (apellido) camposActualizables.apellido = apellido;
+    if (biografia !== undefined) camposActualizables.biografia = biografia;
+    
+    if (req.usuario.rol === 'admin') {
+      if (req.body.estado) camposActualizables.estado = req.body.estado;
+      if (req.body.rol) camposActualizables.rol = req.body.rol;
+    }
+    
+    const usuarioActualizado = await Usuario.findByIdAndUpdate(
+      req.params.id,
+      { $set: camposActualizables },
+      { new: true, runValidators: true }
+    ).select('-__v');
+  
+    if (!usuarioActualizado) {
+      return res.status(404).json({
+        exito: false,
+        mensaje: 'Usuario no encontrado'
+      });
+    }
+  
+    res.json({
+      exito: true,
+      mensaje: 'Usuario actualizado',
+      usuario: {
+        id: usuarioActualizado._id,
+        nombre: usuarioActualizado.nombre,
+        apellido: usuarioActualizado.apellido,
+        email: usuarioActualizado.email,
+        foto_perfil: usuarioActualizado.foto_perfil,
+        biografia: usuarioActualizado.biografia,
+        estado: usuarioActualizado.estado,
+        rol: usuarioActualizado.rol
+      }
+    });
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    res.status(500).json({
+      exito: false,
+      mensaje: 'Error al actualizar usuario',
+      error: error.message
+    });
+  }
+});
+
+module.exports = router;
